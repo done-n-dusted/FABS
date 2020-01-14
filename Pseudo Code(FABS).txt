@@ -1,0 +1,69 @@
+﻿User Side:
+spd = analog from digital input from acc pedal
+brk = analog from digital input from brake pedal
+mode = normal(000); learner(100); traffic(101); highway(110); rain(111);
+                
+current_mode;
+if(current_mode == normal):
+        spdOut = spd;        brkOut = brk;
+        
+else if(curent_mode == learner):
+        if spd < 25:        spdOut = spd;
+        else:        spdOut = 25;
+        
+        if brk < 25:        brkOut = 2*brk;
+        else:        brkOut = 60;
+
+
+else if(current_mode == traffic):
+        spdOut = spd/2;
+        if brk < 30:        brkOut = 2*brk;
+        else:        brkOut = 60;
+
+
+else if(curent_mode == highway):
+        if spd < 40:        spdOut = spd + 20;
+        else:        spdOut = 60;
+        
+        brkOut = brk;
+
+
+else if(current_mode == rain):
+        brkOut = brk/2;
+        if spd < 35:        spdOut = spd;
+        else:        spdOut = 35;
+        
+/*
+The Output is sent in the form of an integer 'mnoxyab'
+mno = mode id
+xy = speed
+ab = brake
+*/
+
+
+data = String(current_mode) + String(spdOut) + String(brkOut)
+output = data.toInt()
+send output through bluetooth
+Vehicle Side:
+Input = data received through Bluetooth module
+String data = String(Input)
+String mode = data.substring(0,2);
+int speed = data.substring(3,4);
+int brake = data.substring(5,6);
+
+
+map(speed,0,63,0,255)
+map(brake,0,63,0,255)
+
+
+if speed - brake > 0:
+    analogWrite(RM1,spd-brk);
+    analogWrite(RM2,0);
+    analogWrite(LM1,spd-brk);
+    analogWrite(LM2,0);
+         
+else: 
+    analogWrite(RM1,0);
+    analogWrite(RM2,0);
+    analogWrite(LM1,0);
+    analogWrite(LM2,0);
